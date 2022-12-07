@@ -2,11 +2,12 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <string>
 
 struct employee {
     std::string first_name = "John";
     std::string last_name = "Doe";
-    std::string pay_date = "01.01.1970";
+    std::string pay_date = "xxx";
     int payment = 0;
 };
 
@@ -56,15 +57,18 @@ void SaveEmployee(employee& input, std::string& path)
     std::ofstream file (path, std::ios::app);
     if (file.is_open())
     {
-        int len = sizeof(input.first_name.c_str());                //get size of first_name string
+        int len = input.first_name.length();         //get size of first_name string
+        std::cout << len << std::endl;
         file.write((char*) &len, sizeof(len));        //write size of uncoming first_name string
         file.write(input.first_name.c_str(), len);    //write first_name string, cast to c-style string
 
-        len = sizeof(input.last_name.c_str());                     //repeat for last_name and date and re-use variable
+        len = input.last_name.length();                     //repeat for last_name and date and re-use variable
+        std::cout << len << std::endl;
         file.write((char*) &len, sizeof(len));
         file.write(input.last_name.c_str(), len);
 
         len = sizeof(input.pay_date.c_str());
+        std::cout << len << std::endl;
         file.write((char*) &len, sizeof(len));
         file.write(input.pay_date.c_str(), len);
 
@@ -84,28 +88,39 @@ void ListRecords(std::string& path)
 {
     std::vector<employee> ledger;
     employee temp;
-    int len;
+    int len = 0;
     std::ifstream file(path, std::ios::binary);
 
-    file.read((char*)&len, sizeof(len));
-    temp.first_name.resize(len);
-    file.read((char*)temp.first_name.c_str(), len);
+    while(!file.eof())
+    {
+        file.read((char*)&len, sizeof(len));
+        temp.first_name.resize(len);
+        file.read((char*)temp.first_name.c_str(), len);
 
-    file.read((char*)&len, sizeof(len));
-    temp.last_name.resize(len);
-    file.read((char*)temp.last_name.c_str(),len);
+        file.read((char*)&len, sizeof(len));
+        temp.last_name.resize(len);
+        file.read((char*)temp.last_name.c_str(),len);
 
-    file.read((char*)&len, sizeof(len));
-    temp.pay_date.resize(len);
-    file.read((char*)temp.pay_date.c_str(),len);
+        file.read((char*)&len, sizeof(len));
+        temp.pay_date.resize(len);
+        file.read((char*)temp.pay_date.c_str(),len);
 
-    file.read((char*)&temp.payment, sizeof(temp.payment));
+        file.read((char*)&temp.payment, sizeof(temp.payment));
 
-    ledger.push_back(temp);
+        ledger.push_back(temp);
+
+        file.peek();        //try reading to set .eof flag, if all contents of the file were already read
+    }
 
     file.close();
 
-    std::cout << ledger[0].first_name << " " << ledger[0].last_name << " " << ledger[0].pay_date << " " << ledger[0].payment << std::endl;
+    for (int i = 0; i < ledger.size(); i++)
+    {
+        std::cout << ledger[i].first_name << " "
+                    << ledger[i].last_name << " "
+                    << ledger[i].pay_date << " "
+                    << ledger[i].payment << std::endl;
+    }
 
     return;
 }

@@ -54,21 +54,18 @@ void EnterRecord(employee& input)
 
 void SaveEmployee(employee& input, std::string& path)
 {
-    std::ofstream file (path, std::ios::app);
+    std::ofstream file (path, std::ios::app | std::ios::binary);
     if (file.is_open())
     {
         int len = input.first_name.length();         //get size of first_name string
-        std::cout << len << std::endl;
         file.write((char*) &len, sizeof(len));        //write size of uncoming first_name string
         file.write(input.first_name.c_str(), len);    //write first_name string, cast to c-style string
 
         len = input.last_name.length();                     //repeat for last_name and date and re-use variable
-        std::cout << len << std::endl;
         file.write((char*) &len, sizeof(len));
         file.write(input.last_name.c_str(), len);
 
-        len = sizeof(input.pay_date.c_str());
-        std::cout << len << std::endl;
+        len = input.pay_date.length();
         file.write((char*) &len, sizeof(len));
         file.write(input.pay_date.c_str(), len);
 
